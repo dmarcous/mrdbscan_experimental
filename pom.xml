@@ -4,8 +4,8 @@
 
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.irvingc.spark</groupId>
-	<artifactId>dbscan-on-spark_2.10</artifactId>
+	<groupId>com.github.dmarcous</groupId>
+	<artifactId>mrdbscan_experimental_2.11</artifactId>
 	<version>0.2.0-SNAPSHOT</version>
 
 	<name>Distributed DBSCAN on Apache Spark</name>
@@ -13,9 +13,9 @@
 	<packaging>jar</packaging>
 
 	<scm>
-		<connection>scm:git:https://github.com/irvingc/dbscan-on-spark</connection>
-		<developerConnection>scm:git:git@github.com:irvingc/dbscan-on-spark.git</developerConnection>
-		<url>https://github.com/irvingc/dbscan-on-spark</url>
+		<connection>scm:git:https://github.com/dmarcous/mrdbscan_experimental</connection>
+		<developerConnection>scm:git:git@github.com:dmarcous/mrdbscan_experimental.git</developerConnection>
+		<url>https://github.com/dmarcous/mrdbscan_experimental</url>
 	</scm>
 
 	<developers>
@@ -25,15 +25,21 @@
 			<email>irving@irvingc.com</email>
 			<url>http://www.irvingc.com</url>
 		</developer>
+		<developer>
+			<id>dmarcous</id>
+			<name>Daniel Marcous</name>
+			<email>dmarcous@gmail.com</email>
+			<url>http://www.dmarcous.com</url>
+		</developer>
 	</developers>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<scala.version>2.10.4</scala.version>
-		<scala.binary.version>2.10</scala.binary.version>
-		<scalatest.version>2.2.1</scalatest.version>
-		<spark.version>2.1.0</spark.version>
+		<scala.version>2.11.8</scala.version>
+		<scala.binary.version>2.11</scala.binary.version>
+		<scalatest.version>3.0.5</scalatest.version>
+		<spark.version>2.3.2</spark.version>
 	</properties>
 
 	<repositories>

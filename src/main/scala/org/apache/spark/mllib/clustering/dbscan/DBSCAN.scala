@@ -118,7 +118,7 @@ class DBSCAN private (
       duplicated
         .groupByKey(numOfPartitions)
         .flatMapValues(points =>
-          new LocalDBSCANNaive(eps, minPoints).fit(points))
+          new LocalDBSCANArchery(eps, minPoints).fit(points))
         .cache()
 
     // find all candidate points for merging clusters and group them
