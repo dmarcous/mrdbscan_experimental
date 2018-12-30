@@ -16,9 +16,9 @@
  */
 package org.apache.spark.mllib.clustering.dbscan
 
-import org.apache.spark.rdd.PairRDDFunctions
 import org.apache.spark.mllib.linalg.Vectors
 import org.apache.spark.mllib.util.MLlibTestSparkContext
+import org.apache.spark.sql.SparkSession
 import org.scalatest.Matchers
 
 class DBSCANSuite extends LocalDBSCANArcherySuite with MLlibTestSparkContext with Matchers {
@@ -29,12 +29,19 @@ class DBSCANSuite extends LocalDBSCANArcherySuite with MLlibTestSparkContext wit
   // private val corresponding = Map(3 -> 2D, 2 -> 1D, 1 -> 3D, 0 -> 0D)
 
   test("dbscan") {
+    val spark =
+      SparkSession
+        .builder()
+        .master("local")
+        .appName("dDBGSCANRunnerTest")
+        .getOrCreate()
 
     val data = sc.textFile(getFile(dataFile).toString())
 
     val parsedData = data.map(s => Vectors.dense(s.split(',').map(_.toDouble)))
 
-    val model = DBSCAN.train(parsedData, eps = 100, minPoints = 3, maxPointsPerPartition = 999)
+    val model = DBSCAN.train(spark, parsedData,
+      eps = 100, minPoints = 3, maxPointsPerPartition = 999)
     
 
     val clustered = model.labeledPoints

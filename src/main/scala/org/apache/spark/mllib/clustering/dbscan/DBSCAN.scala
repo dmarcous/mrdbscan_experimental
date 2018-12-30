@@ -17,10 +17,10 @@
 package org.apache.spark.mllib.clustering.dbscan
 
 import org.apache.spark.internal.Logging
-import org.apache.spark.rdd.PairRDDFunctions
 import org.apache.spark.mllib.clustering.dbscan.DBSCANLabeledPoint.Flag
 import org.apache.spark.mllib.linalg.Vector
 import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.SparkSession
 
 /**
  * Top level method for calling DBSCAN
@@ -38,13 +38,20 @@ object DBSCAN {
    * @param maxPointsPerPartition the largest number of points in a single partition
    */
   def train(
+    @transient spark: SparkSession,
     data: RDD[Vector],
     eps: Double,
     minPoints: Int,
     maxPointsPerPartition: Int): DBSCAN = {
 
-    new DBSCAN(eps, minPoints, maxPointsPerPartition, null, null).train(data)
+    new DBSCAN(spark, eps, minPoints, maxPointsPerPartition, null, null).train(data)
 
+  }
+
+  def setJobStageNameInSparkUI(@transient spark: SparkSession,
+                               stageName: String, stageDescription: String): Unit =
+  {
+    spark.sparkContext.setJobGroup(stageName, stageDescription)
   }
 
 }
@@ -60,6 +67,7 @@ object DBSCAN {
  *  any given RDDs should be cached by the user.
  */
 class DBSCAN private (
+  @transient val spark: SparkSession,
   val eps: Double,
   val minPoints: Int,
   val maxPointsPerPartition: Int,
@@ -81,6 +89,8 @@ class DBSCAN private (
 
     // generate the smallest rectangles that split the space
     // and count how many points are contained in each one of them
+    DBSCAN.setJobStageNameInSparkUI(spark, "Partitioning",
+      "Stage 1 - Cost based partitioning (geo aware)")
     val minimumRectanglesWithCount =
       vectors
         .map(toMinimumBoundingRectangle)
@@ -114,6 +124,8 @@ class DBSCAN private (
     val numOfPartitions = localPartitions.size
 
     // perform local dbscan
+    DBSCAN.setJobStageNameInSparkUI(spark, "Clustering",
+      "Stage 2 - Cluster data locally in each partition using modified geo DBSCAN")
     val clustered =
       duplicated
         .groupByKey(numOfPartitions)
@@ -122,6 +134,8 @@ class DBSCAN private (
         .cache()
 
     // find all candidate points for merging clusters and group them
+    DBSCAN.setJobStageNameInSparkUI(spark, "Merging",
+      "Stage 3 - Merge overlapping clusters from different partitions")
     val mergePoints =
       clustered
         .flatMap({
@@ -233,6 +247,7 @@ class DBSCAN private (
     logDebug("Done")
 
     new DBSCAN(
+      spark,
       eps,
       minPoints,
       maxPointsPerPartition,
