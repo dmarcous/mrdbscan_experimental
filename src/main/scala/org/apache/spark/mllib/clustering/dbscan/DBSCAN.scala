@@ -106,7 +106,7 @@ class DBSCAN private (
 
     // assign each point to its proper partition
     val duplicated = for {
-      point <- vectors.map(DBSCANPoint)
+      point <- vectors.map(DBSCANGeoPoint)
       ((inner, main, outer), id) <- margins.value
       if outer.contains(point)
     } yield (id, point)
@@ -204,7 +204,7 @@ class DBSCAN private (
     // de-duplicate and label merge points
     val labeledOuter =
       mergePoints.flatMapValues(partition => {
-        partition.foldLeft(Map[DBSCANPoint, DBSCANLabeledPoint]())({
+        partition.foldLeft(Map[DBSCANGeoPoint, DBSCANLabeledPoint]())({
           case (all, (partition, point)) =>
 
             if (point.flag != Flag.Noise) {
@@ -266,7 +266,7 @@ class DBSCAN private (
   private def findAdjacencies(
     partition: Iterable[(Int, DBSCANLabeledPoint)]): Set[((Int, Int), (Int, Int))] = {
 
-    val zero = (Map[DBSCANPoint, ClusterId](), Set[(ClusterId, ClusterId)]())
+    val zero = (Map[DBSCANGeoPoint, ClusterId](), Set[(ClusterId, ClusterId)]())
 
     val (seen, adjacencies) = partition.foldLeft(zero)({
 
@@ -291,16 +291,7 @@ class DBSCAN private (
   }
 
   private def toMinimumBoundingRectangle(vector: Vector): DBSCANRectangle = {
-    val point = DBSCANPoint(vector)
-    val x = corner(point.x)
-    val y = corner(point.y)
-    DBSCANRectangle(x, y, x + minimumRectangleSize, y + minimumRectangleSize)
+    val point = DBSCANGeoPoint(vector)
+    point.getBoundingBox(eps)
   }
-
-  private def corner(p: Double): Double =
-    (shiftIfNegative(p) / minimumRectangleSize).intValue * minimumRectangleSize
-
-  private def shiftIfNegative(p: Double): Double =
-    if (p < 0) p - minimumRectangleSize else p
-
 }

@@ -23,9 +23,10 @@ import org.scalatest.Matchers
 
 class DBSCANSuite extends LocalDBSCANArcherySuite with MLlibTestSparkContext with Matchers {
 
-  private val dataFile = "labeled_data.csv"
+  // private val dataFile = "labeled_data.csv"
+  private val dataFile = "geo_data.csv"
 
-  private val corresponding = Map(3 -> 2D, 2 -> 1D, 1 -> 3D, 0 -> 0D)
+  // private val corresponding = Map(3 -> 2D, 2 -> 1D, 1 -> 3D, 0 -> 0D)
 
   test("dbscan") {
 
@@ -33,13 +34,13 @@ class DBSCANSuite extends LocalDBSCANArcherySuite with MLlibTestSparkContext wit
 
     val parsedData = data.map(s => Vectors.dense(s.split(',').map(_.toDouble)))
 
-    val model = DBSCAN.train(parsedData, eps = 0.3F, minPoints = 10, maxPointsPerPartition = 250)
+    val model = DBSCAN.train(parsedData, eps = 100, minPoints = 3, maxPointsPerPartition = 999)
     
 
     val clustered = model.labeledPoints
       .map(p => (p, p.cluster))
       .collectAsMap()
-      .mapValues(x => corresponding(x))
+      // .mapValues(x => corresponding(x))
 
     val expected = getExpectedData(dataFile).toMap
 

@@ -31,9 +31,9 @@ import archery.RTree
  */
 class LocalDBSCANArchery(eps: Double, minPoints: Int) extends Logging {
 
-  val minDistanceSquared = eps * eps
+  val minDistance = eps
 
-  def fit(points: Iterable[DBSCANPoint]): Iterable[DBSCANLabeledPoint] = {
+  def fit(points: Iterable[DBSCANGeoPoint]): Iterable[DBSCANLabeledPoint] = {
 
     val tree = points.foldLeft(RTree[DBSCANLabeledPoint]())(
       (tempTree, p) =>
@@ -111,16 +111,17 @@ class LocalDBSCANArchery(eps: Double, minPoints: Int) extends Logging {
 
   }
 
-  private def inRange(point: DBSCANPoint)(entry: Entry[DBSCANLabeledPoint]): Boolean = {
-    entry.value.distanceSquared(point) <= minDistanceSquared
+  private def inRange(point: DBSCANGeoPoint)(entry: Entry[DBSCANLabeledPoint]): Boolean = {
+    entry.value.geoDistance(point) <= minDistance
   }
 
-  private def toBoundingBox(point: DBSCANPoint): Box = {
+  private def toBoundingBox(point: DBSCANGeoPoint): Box = {
+    val bb = point.getBoundingBox(eps)
     Box(
-      (point.x - eps).toFloat,
-      (point.y - eps).toFloat,
-      (point.x + eps).toFloat,
-      (point.y + eps).toFloat)
+      (bb.x).toFloat,
+      (bb.y).toFloat,
+      (bb.x2).toFloat,
+      (bb.y2).toFloat)
   }
 
 }

@@ -26,17 +26,18 @@ import org.apache.spark.mllib.linalg.Vectors
 
 class LocalDBSCANArcherySuite extends FunSuite with Matchers {
 
-  private val dataFile = "labeled_data.csv"
+  // private val dataFile = "labeled_data.csv"
+  private val dataFile = "geo_data.csv"
 
   test("should cluster") {
 
-    val labeled: Map[DBSCANPoint, Double] =
-      new LocalDBSCANArchery(eps = 0.3F, minPoints = 10)
+    val labeled: Map[DBSCANGeoPoint, Double] =
+      new LocalDBSCANArchery(eps = 100, minPoints = 3)
         .fit(getRawData(dataFile))
         .map(l => (l, l.cluster.toDouble))
         .toMap
 
-    val expected: Map[DBSCANPoint, Double] = getExpectedData(dataFile).toMap
+    val expected: Map[DBSCANGeoPoint, Double] = getExpectedData(dataFile).toMap
 
     labeled.foreach {
       case (key, value) => {
@@ -52,23 +53,23 @@ class LocalDBSCANArcherySuite extends FunSuite with Matchers {
 
   }
 
-  def getExpectedData(file: String): Iterator[(DBSCANPoint, Double)] = {
+  def getExpectedData(file: String): Iterator[(DBSCANGeoPoint, Double)] = {
     Source
       .fromFile(getFile(file))
       .getLines()
       .map(s => {
         val vector = Vectors.dense(s.split(',').map(_.toDouble))
-        val point = DBSCANPoint(vector)
+        val point = DBSCANGeoPoint(vector)
         (point, vector(2))
       })
   }
 
-  def getRawData(file: String): Iterable[DBSCANPoint] = {
+  def getRawData(file: String): Iterable[DBSCANGeoPoint] = {
 
     Source
       .fromFile(getFile(file))
       .getLines()
-      .map(s => DBSCANPoint(Vectors.dense(s.split(',').map(_.toDouble))))
+      .map(s => DBSCANGeoPoint(Vectors.dense(s.split(',').map(_.toDouble))))
       .toIterable
   }
 

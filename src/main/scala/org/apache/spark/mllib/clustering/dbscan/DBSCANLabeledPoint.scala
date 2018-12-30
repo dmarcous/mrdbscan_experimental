@@ -32,9 +32,9 @@ object DBSCANLabeledPoint {
 
 }
 
-class DBSCANLabeledPoint(vector: Vector) extends DBSCANPoint(vector) {
+class DBSCANLabeledPoint(vector: Vector) extends DBSCANGeoPoint(vector) {
 
-  def this(point: DBSCANPoint) = this(point.vector)
+  def this(point: DBSCANGeoPoint) = this(point.vector)
 
   var flag = DBSCANLabeledPoint.Flag.NotFlagged
   var cluster = DBSCANLabeledPoint.Unknown

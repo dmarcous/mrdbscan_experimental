@@ -16,17 +16,31 @@
  */
 package org.apache.spark.mllib.clustering.dbscan
 
+import com.github.dmarcous.s2utils.converters.UnitConverters
 import org.apache.spark.mllib.linalg.Vector
+import com.github.dmarcous.s2utils.geo.GeographyUtilities
+import com.vividsolutions.jts.geom.Coordinate
 
-case class DBSCANPoint(val vector: Vector) {
+case class DBSCANGeoPoint(val vector: Vector) {
 
+  // x = Longitude
   def x = vector(0)
+  // x = Latitude
   def y = vector(1)
 
-  def distanceSquared(other: DBSCANPoint): Double = {
-    val dx = other.x - x
-    val dy = other.y - y
-    (dx * dx) + (dy * dy)
+  // Meters distance
+  def geoDistance(other: DBSCANGeoPoint): Double = {
+    GeographyUtilities.haversineDistance(x, y, other.x, other.y)
   }
 
+  def getBoundingBox(radiusMeters: Double): DBSCANRectangle = {
+    val gf = GeographyUtilities.createGeometryFactory()
+    val angleRadius = UnitConverters.metricToAngularDistance(radiusMeters)
+
+    val boundingBox =
+      gf.createPoint(new Coordinate(x, y))
+        .buffer(angleRadius).getEnvelopeInternal
+
+    DBSCANRectangle.fromGeoBoundingBox(boundingBox)
+  }
 }

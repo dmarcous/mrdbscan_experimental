@@ -16,6 +16,10 @@
  */
 package org.apache.spark.mllib.clustering.dbscan
 
+import com.github.dmarcous.s2utils.converters.UnitConverters
+import com.github.dmarcous.s2utils.geo.GeographyUtilities
+import com.vividsolutions.jts.geom.{Coordinate, Envelope, Geometry}
+
 /**
  * A rectangle with a left corner of (x, y) and a right upper corner of (x2, y2)
  */
@@ -31,23 +35,48 @@ case class DBSCANRectangle(x: Double, y: Double, x2: Double, y2: Double) {
   /**
    * Returns whether point is contained by this box
    */
-  def contains(point: DBSCANPoint): Boolean = {
+  def contains(point: DBSCANGeoPoint): Boolean = {
     x <= point.x && point.x <= x2 && y <= point.y && point.y <= y2
   }
 
   /**
    * Returns a new box from shrinking this box by the given amount
    */
-  def shrink(amount: Double): DBSCANRectangle = {
-    DBSCANRectangle(x + amount, y + amount, x2 - amount, y2 - amount)
+  def shrink(amountMeters: Double): DBSCANRectangle = {
+    val angleRadius = UnitConverters.metricToAngularDistance(amountMeters)
+
+    var bb = this.toGeoBoundingBox()
+    bb.expandBy(-1.0 * angleRadius)
+
+    DBSCANRectangle.fromGeoBoundingBox(bb)
+  }
+
+  def toGeoBoundingBox(): Envelope = {
+    val gf = GeographyUtilities.createGeometryFactory()
+    var boundingBox =
+      gf.createPoint(new Coordinate(x, y))
+        .getEnvelopeInternal
+
+    boundingBox.expandToInclude(new Coordinate(x2, y2))
+
+    boundingBox
   }
 
   /**
    * Returns a whether the rectangle contains the point, and the point
    * is not in the rectangle's border
    */
-  def almostContains(point: DBSCANPoint): Boolean = {
+  def almostContains(point: DBSCANGeoPoint): Boolean = {
     x < point.x && point.x < x2 && y < point.y && point.y < y2
   }
 
+}
+
+// Companion object
+object DBSCANRectangle
+{
+  def fromGeoBoundingBox(bb: Envelope): DBSCANRectangle = {
+    DBSCANRectangle(bb.getMinX, bb.getMinY,
+      bb.getMaxX, bb.getMaxY)
+  }
 }
