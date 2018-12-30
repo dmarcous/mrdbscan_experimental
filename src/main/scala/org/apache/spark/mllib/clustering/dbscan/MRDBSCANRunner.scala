@@ -31,9 +31,9 @@ object MRDBSCANRunner{
 
     val results =
       model.labeledPoints.map(p => (
-        (p.x.toString + "|" + p.y.toString),
+         p.x.toString + "|" + p.y.toString,
          p.cluster,
-         p.flag.id)
+         p.flag.id))
 
     // Write output
     println("Writing results...")
