@@ -19,6 +19,7 @@ package org.apache.spark.mllib.clustering.dbscan
 import java.io.File
 
 import com.github.dmarcous.ddbgscan.api.RuntimeConfig
+import com.github.dmarcous.ddbgscan.core.config.CoreConfig.{DEFAULT_GEO_FILE_DELIMITER, DEFAULT_LATITUDE_POSITION_FIELD_NUMBER, DEFAULT_LONGITUDE_POSITION_FIELD_NUMBER, NO_UNIQUE_ID_FIELD}
 import com.github.dmarcous.ddbgscan.core.config.{AlgorithmParameters, IOConfig}
 import org.apache.commons.io.FileUtils
 import org.apache.spark.sql.SparkSession
@@ -33,11 +34,19 @@ class CLIRunnerSuite extends FunSuite with Matchers {
     epsilon,
     minPts
   )
-  val inputPath = "./src/test/resources/geo_data.csv"
+  val inputPath = "./src/test/resources/indexed_geo_data.csv"
   val outputFolderPath = "/tmp/MRDBGSCAN/"
+  val positionId = NO_UNIQUE_ID_FIELD
+  val positionLon = DEFAULT_LONGITUDE_POSITION_FIELD_NUMBER+1
+  val positionLat = DEFAULT_LATITUDE_POSITION_FIELD_NUMBER+1
+  val delimiter = DEFAULT_GEO_FILE_DELIMITER
   val ioConfig = IOConfig(
     inputPath,
-    outputFolderPath
+    outputFolderPath,
+    positionId,
+    positionLon,
+    positionLat,
+    delimiter
   )
   val conf =
     RuntimeConfig(
@@ -48,6 +57,8 @@ class CLIRunnerSuite extends FunSuite with Matchers {
   val args =
     Array(
       "--inputFilePath",inputPath,"--outputFolderPath",outputFolderPath,
+      "--positionFieldLon",positionLon.toString,"--positionFieldLat",positionLat.toString,
+      "--inputFieldDelimiter",delimiter,
       "--epsilon",epsilon.toString,"--minPts",minPts.toString,
       "--maxPointsPerPartition",maxPointsPerPartition.toString
     )
