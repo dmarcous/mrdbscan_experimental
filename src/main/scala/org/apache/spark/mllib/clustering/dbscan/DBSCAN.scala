@@ -16,6 +16,7 @@
  */
 package org.apache.spark.mllib.clustering.dbscan
 
+import com.github.dmarcous.s2utils.converters.UnitConverters
 import org.apache.spark.internal.Logging
 import org.apache.spark.mllib.clustering.dbscan.DBSCANLabeledPoint.Flag
 import org.apache.spark.mllib.linalg.Vector
@@ -79,7 +80,7 @@ class DBSCAN private (
   type Margins = (DBSCANRectangle, DBSCANRectangle, DBSCANRectangle)
   type ClusterId = (Int, Int)
 
-  def minimumRectangleSize = 2 * eps
+  def minimumRectangleSize = UnitConverters.metricToAngularDistance(eps)*2
 
   def labeledPoints: RDD[DBSCANLabeledPoint] = {
     labeledPartitionedPoints.values
@@ -103,8 +104,8 @@ class DBSCAN private (
     val localPartitions = EvenSplitPartitioner
       .partition(minimumRectanglesWithCount, maxPointsPerPartition, minimumRectangleSize)
 
-    logDebug("Found partitions: ")
-    localPartitions.foreach(p => logDebug(p.toString))
+//    logDebug("Found partitions: ")
+//    localPartitions.foreach(p => logDebug(p.toString))
 
     // grow partitions to include eps
     val localMargins =
@@ -123,6 +124,9 @@ class DBSCAN private (
 
     val numOfPartitions = localPartitions.size
 
+    // Trigger ops before clustering for time measurements
+    duplicated.count()
+
     // perform local dbscan
     DBSCAN.setJobStageNameInSparkUI(spark, "Clustering",
       "Stage 2 - Cluster data locally in each partition using modified geo DBSCAN")
@@ -131,7 +135,10 @@ class DBSCAN private (
         .groupByKey(numOfPartitions)
         .flatMapValues(points =>
           new LocalDBSCANArchery(eps, minPoints).fit(points))
-        .cache()
+    //    .cache() - remove caching due to consistently failing at this point for large datasets
+
+    // Trigger ops before merging for time measurements
+    clustered.count()
 
     // find all candidate points for merging clusters and group them
     DBSCAN.setJobStageNameInSparkUI(spark, "Merging",

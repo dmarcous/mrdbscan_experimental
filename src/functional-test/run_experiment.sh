@@ -7,6 +7,8 @@
 # --experiment_index
 # --local_exp_dir
 # --parallelism
+# --minpts
+# --epsilon
 
 # Experiment setup
 MINPTS=20
@@ -48,6 +50,14 @@ shift
 ;;
 --parallelism=*)
 PARALLELISM="${i#*=}"
+shift
+;;
+--minpts=*)
+MINPTS="${i#*=}"
+shift
+;;
+--epsilon=*)
+EPSILON="${i#*=}"
 shift
 ;;
 -*)

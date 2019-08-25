@@ -45,6 +45,9 @@ object MRDBSCANRunner{
          else UNKNOWN.value
       ))
 
+    // Trigger ops before output for time measurements
+    results.count()
+
     // Write output
     println("Writing results...")
     DBSCAN.setJobStageNameInSparkUI(spark, "Output",

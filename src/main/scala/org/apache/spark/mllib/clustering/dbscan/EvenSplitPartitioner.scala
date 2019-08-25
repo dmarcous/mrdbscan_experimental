@@ -26,9 +26,9 @@ import org.apache.spark.internal.Logging
 object EvenSplitPartitioner {
 
   def partition(
-    toSplit: Set[(DBSCANRectangle, Int)],
-    maxPointsPerPartition: Long,
-    minimumRectangleSize: Double): List[(DBSCANRectangle, Int)] = {
+                 toSplit: Set[(DBSCANRectangle, Int)],
+                 maxPointsPerPartition: Long,
+                 minimumRectangleSize: Double): List[(DBSCANRectangle, Int)] = {
     new EvenSplitPartitioner(maxPointsPerPartition, minimumRectangleSize)
       .findPartitions(toSplit)
   }
