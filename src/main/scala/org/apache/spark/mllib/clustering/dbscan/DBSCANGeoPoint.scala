@@ -43,4 +43,18 @@ case class DBSCANGeoPoint(val vector: Vector) {
 
     DBSCANRectangle.fromGeoBoundingBox(boundingBox)
   }
+
+  def toMBR(minimumRectangleSize: Double): DBSCANRectangle = {
+    val x = getCorner(this.x, minimumRectangleSize)
+    val y = getCorner(this.y, minimumRectangleSize)
+    DBSCANRectangle(x, y, x + minimumRectangleSize, y + minimumRectangleSize)
+  }
+
+  private def getCorner(partialCoordinate: Double, minimumRectangleSize: Double): Double = {
+    (shiftIfNegative(partialCoordinate, minimumRectangleSize) / minimumRectangleSize).intValue * minimumRectangleSize
+  }
+
+  private def shiftIfNegative(partialCoordinate: Double, minimumRectangleSize: Double): Double = {
+    if (partialCoordinate < 0) partialCoordinate - minimumRectangleSize else partialCoordinate
+  }
 }

@@ -138,9 +138,11 @@ class EvenSplitPartitioner(
    */
   private def findPossibleSplits(box: DBSCANRectangle): Set[DBSCANRectangle] = {
 
-    val xSplits = (box.x + minimumRectangleSize) until box.x2 by minimumRectangleSize
+    val xIncrement = if (box.x2 >= box.x) minimumRectangleSize else (minimumRectangleSize * -1.0)
+    val xSplits = (box.x + xIncrement) until box.x2 by xIncrement
 
-    val ySplits = (box.y + minimumRectangleSize) until box.y2 by minimumRectangleSize
+    val yIncrement = if (box.y2 >= box.y) minimumRectangleSize else (minimumRectangleSize * -1.0)
+    val ySplits = (box.y + yIncrement) until box.y2 by yIncrement
 
     val splits =
       xSplits.map(x => DBSCANRectangle(box.x, box.y, x, box.y2)) ++
@@ -155,8 +157,10 @@ class EvenSplitPartitioner(
    * Returns true if the given rectangle can be split into at least two rectangles of minimum size
    */
   private def canBeSplit(box: DBSCANRectangle): Boolean = {
-    (box.x2 - box.x > minimumRectangleSize * 2 ||
-      box.y2 - box.y > minimumRectangleSize * 2)
+    (math.abs(box.x2 - box.x) > minimumRectangleSize ||
+      math.abs(box.y2 - box.y) > minimumRectangleSize)
+//    (box.x2 - box.x > minimumRectangleSize * 2 ||
+//      box.y2 - box.y > minimumRectangleSize * 2)
   }
 
   def pointsInRectangle(space: Set[RectangleWithCount], rectangle: DBSCANRectangle): Int = {

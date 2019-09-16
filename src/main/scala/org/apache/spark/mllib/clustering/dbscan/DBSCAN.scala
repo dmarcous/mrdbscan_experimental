@@ -80,7 +80,7 @@ class DBSCAN private (
   type Margins = (DBSCANRectangle, DBSCANRectangle, DBSCANRectangle)
   type ClusterId = (Int, Int)
 
-  def minimumRectangleSize = UnitConverters.metricToAngularDistance(eps)*2
+  def minimumRectangleSize = UnitConverters.metricToAngularDistance(eps*2)
 
   def labeledPoints: RDD[DBSCANLabeledPoint] = {
     labeledPartitionedPoints.values
@@ -314,6 +314,7 @@ class DBSCAN private (
 
   private def toMinimumBoundingRectangle(vector: Vector): DBSCANRectangle = {
     val point = DBSCANGeoPoint(vector)
-    point.getBoundingBox(eps)
+    //point.getBoundingBox(eps)
+    point.toMBR(minimumRectangleSize)
   }
 }
