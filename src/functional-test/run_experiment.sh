@@ -18,9 +18,14 @@ EPSILON=40
 LOCAL="/mnt/experiments/"
 INPUT_REMOTE="s3://mybucket/data/"
 OUTPUT_REMOTE="s3://mybucket/output/"
-MAXPTS=250
+PARTITION_LVL=99
 INDEX=0
 PARALLELISM=256
+NUM_PARTITIONS=256
+PARTITIONING_STATEGY="cost"
+DEBUG="false"
+MAX_POINTS_PER_PARTITION=256
+DRIVER_MEMORY="1g"
 
 # Read params
 echo 'Reading script params...'
@@ -28,8 +33,8 @@ echo 'Reading script params...'
 for i in "$@"
 do
 case $i in
---max_points_per_partition=*)
-MAXPTS="${i#*=}"
+--neighborhood_partitioning_lvl=*)
+PARTITION_LVL="${i#*=}"
 shift
 ;;
 --input_remote_dir=*)
@@ -52,12 +57,32 @@ shift
 PARALLELISM="${i#*=}"
 shift
 ;;
+--numPartitions=*)
+NUM_PARTITIONS="${i#*=}"
+shift
+;;
 --minpts=*)
 MINPTS="${i#*=}"
 shift
 ;;
 --epsilon=*)
 EPSILON="${i#*=}"
+shift
+;;
+--partitioningStrategy=*)
+PARTITIONING_STATEGY="${i#*=}"
+shift
+;;
+--debug=*)
+DEBUG="${i#*=}"
+shift
+;;
+--maxPointsPerPartition=*)
+MAX_POINTS_PER_PARTITION="${i#*=}"
+shift
+;;
+--driverMemory=*)
+DRIVER_MEMORY="${i#*=}"
 shift
 ;;
 -*)
@@ -74,18 +99,23 @@ echo 'Running with parameters : '
 echo "INPUT_REMOTE = ${INPUT_REMOTE}"
 echo "OUTPUT_REMOTE = ${OUTPUT_REMOTE}"
 echo "LOCAL = ${LOCAL}"
-echo "MAXPTS = ${MAXPTS}"
+echo "PARTITION_LVL = ${PARTITION_LVL}"
 echo "MINPTS = ${MINPTS}"
 echo "EPSILON = ${EPSILON}"
 echo "INDEX = ${INDEX}"
 echo "PARALLELISM = ${PARALLELISM}"
+echo "NUM_PARTITIONS = ${NUM_PARTITIONS}"
+echo "PARTITIONING_STATEGY = ${PARTITIONING_STATEGY}"
+echo "MAX_POINTS_PER_PARTITION = ${MAX_POINTS_PER_PARTITION}"
+echo "DRIVER_MEMORY = ${DRIVER_MEMORY}"
+echo "DEBUG = ${DEBUG}"
 
 # Set useful variables
 JAR_PATH="/resources/jar/mrdbscan_experimental_2.11-2.4.3_1.0.0.jar"
-CURRENT_EXP_OUTPUT=$OUTPUT_REMOTE/MRDBSCAN/part_$MAXPTS/exp_$INDEX/
+CURRENT_EXP_OUTPUT=$OUTPUT_REMOTE/mrdbscan/cost/partlvl_99/maxp_$MAX_POINTS_PER_PARTITION/exp_$INDEX/
 
 echo "Preparing run cmd"
-RUN_CMD="/usr/lib/spark/bin/spark-submit --class org.apache.spark.mllib.clustering.dbscan.CLIRunner --driver-java-options='-Dspark.yarn.app.container.log.dir=/mnt/var/log/hadoop' --conf spark.default.parallelism=${PARALLELISM} ${LOCAL}${JAR_PATH} --inputFilePath ${INPUT_REMOTE} --outputFolderPath ${CURRENT_EXP_OUTPUT} --positionFieldLon 1 --positionFieldLat 2 --inputFieldDelimiter , --epsilon ${EPSILON} --minPts ${MINPTS} --maxPointsPerPartition ${MAXPTS}"
+RUN_CMD="/usr/lib/spark/bin/spark-submit --class org.apache.spark.mllib.clustering.dbscan.CLIRunner --driver-java-options='-Dspark.yarn.app.container.log.dir=/mnt/var/log/hadoop' --conf spark.default.parallelism=${PARALLELISM} --conf spark.driver.maxResultSize=4g ${LOCAL}${JAR_PATH} --inputFilePath ${INPUT_REMOTE} --outputFolderPath ${CURRENT_EXP_OUTPUT} --positionFieldId 0 --positionFieldLon 1 --positionFieldLat 2 --inputFieldDelimiter , --epsilon ${EPSILON} --minPts ${MINPTS} --maxPointsPerPartition ${MAX_POINTS_PER_PARTITION}"
 echo ${RUN_CMD}
 
 echo "Starting run"

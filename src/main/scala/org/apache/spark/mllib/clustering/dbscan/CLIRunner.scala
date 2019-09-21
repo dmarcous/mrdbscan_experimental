@@ -27,7 +27,7 @@ object CLIRunner {
     Usage: /usr/lib/spark/bin/spark-submit --class org.apache.spark.mllib.clustering.dbscan.CLIRunner [filename.jar]
     --inputFilePath [string] --outputFolderPath [string]
     --epsilon [double] --minPts [int]
-    [--positionFieldLon int] [--positionFieldLat int]
+    [--positionFieldId int] [--positionFieldLon int] [--positionFieldLat int]
     [--inputFieldDelimiter int]
     [--maxPointsPerPartition int]
     """
@@ -44,6 +44,7 @@ object CLIRunner {
 
     args.sliding(2, 2).toList.collect{
       case Array("--inputFilePath", argInputFilePath: String) => inputPath = argInputFilePath
+      case Array("--positionFieldId", argPositionFieldId: String) => positionFieldId = argPositionFieldId.toInt
       case Array("--positionFieldLon", argPositionFieldLon: String) => positionFieldLon= argPositionFieldLon.toInt
       case Array("--positionFieldLat", argPositionFieldLat: String) => positionFieldLat = argPositionFieldLat.toInt
       case Array("--inputFieldDelimiter", argOnputFieldDelimiter: String) => inputFieldDelimiter = argOnputFieldDelimiter
