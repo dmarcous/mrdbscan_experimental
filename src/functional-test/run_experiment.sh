@@ -18,7 +18,6 @@ EPSILON=40
 LOCAL="/mnt/experiments/"
 INPUT_REMOTE="s3://mybucket/data/"
 OUTPUT_REMOTE="s3://mybucket/output/"
-PARTITION_LVL=99
 INDEX=0
 PARALLELISM=256
 NUM_PARTITIONS=256
@@ -99,7 +98,6 @@ echo 'Running with parameters : '
 echo "INPUT_REMOTE = ${INPUT_REMOTE}"
 echo "OUTPUT_REMOTE = ${OUTPUT_REMOTE}"
 echo "LOCAL = ${LOCAL}"
-echo "PARTITION_LVL = ${PARTITION_LVL}"
 echo "MINPTS = ${MINPTS}"
 echo "EPSILON = ${EPSILON}"
 echo "INDEX = ${INDEX}"
