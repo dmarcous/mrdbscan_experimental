@@ -46,7 +46,7 @@ organization := "com.github.dmarcous"
 homepage := Some(url("https://github.com/dmarcous/mrdbscan_experimental"))
 scmInfo := Some(ScmInfo(url("https://github.com/dmarcous/mrdbscan_experimental"),
   "scm:git@github.com:dmarcous/mrdbscan_experimental.git"))
-developers := List(Developer("dmarcous",
+developers := List(Developer("dmarcous", 
   "Daniel Marcous",
   "dmarcous@gmail.com",
   url("https://github.com/dmarcous")))
